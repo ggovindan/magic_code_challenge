@@ -13,8 +13,9 @@ pyenv activate magic_code_challenge
 
 ```
 
-To run tests make sure pyenv is installed in env
-`pip install pytest`
+The environment needs memory-profiler and pyenv package
+
+`pip install -r requirements.txt`
 
 then run
 

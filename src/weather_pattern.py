@@ -2,10 +2,24 @@ import csv
 from collections import defaultdict
 from datetime import datetime
 import statistics
+import functools
+import time
 
 
 class BadDataException(Exception):
     pass
+
+def timer(func):
+    """Print the runtime of the decorated function"""
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        start = time.perf_counter()
+        value = func(*args, **kwargs)
+        end = time.perf_counter()
+        run_time = end - start
+        print(f"{func.__name__} execution_time: {run_time:.4f} secs")
+        return value
+    return wrapper_timer
 
 class TemperatureData:
     """
@@ -31,6 +45,7 @@ class TemperatureData:
         self.last_update_time = datetime.utcfromtimestamp(0)
         self.last_import_time = datetime.utcfromtimestamp(0)
 
+    @timer
     def load_data(self, csv_path: str):
         with open(csv_path) as csvfile:
             csvdata = csv.reader(csvfile, delimiter=",")
@@ -73,6 +88,7 @@ class TemperatureData:
             self.last_import_time = datetime.utcnow()
 
     # Part 1:
+    @timer
     def get_lowest_temperature(self):
         if self.last_import_time < self.last_update_time:
             return self.last_seen_lowest
@@ -82,6 +98,7 @@ class TemperatureData:
         return self.last_seen_lowest
 
     # Part 2;
+    @timer
     def get_fluctuation_across_all_dates(self):
         variance_per_station = {}
         for station_id in self.dataset:
@@ -93,6 +110,7 @@ class TemperatureData:
         return max([(k,v) for k,v in variance_per_station.items()], key=lambda x: x[1])
 
     # part 3:
+    @timer
     def get_fluctuation_for_date_range(self, start_dt, end_dt):
         variance_per_station = {}
         for station_id in self.dataset:
@@ -110,7 +128,7 @@ class TemperatureData:
 
 if __name__ == "__main__":
     obj = TemperatureData()
-    obj.load_data("test_data.csv")
+    obj.load_data("../data.csv")
     print(obj.get_lowest_temperature())
     print(obj.get_fluctuation_across_all_dates())
     print(obj.get_fluctuation_for_date_range(datetime.strptime("2003.125", "%Y.%f"), datetime.strptime("2003.375", "%Y.%f")))
